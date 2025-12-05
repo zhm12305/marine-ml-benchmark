@@ -281,7 +281,7 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 
 ## 📞 Contact
 
-- **Author**: [Your Name] ([your.email@institution.edu])
+- **Author**: [Hanming Zhang] ([zhm19334637080@gmail.com])
 - **Issues**: [GitHub Issues](https://github.com/[username]/marine-ml-benchmark/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/[username]/marine-ml-benchmark/discussions)
 
