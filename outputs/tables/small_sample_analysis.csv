@@ -1,0 +1,3 @@
+Dataset,Samples,Variables,Sample/Feature Ratio,Minimum Required,Meets Minimum,Curse of Dimensionality Risk,Exclusion Reason,Data Quality,Recommendation
+phyto_long,82,1,82.00,100,False,LOW,Sample size below minimum threshold (N < 100),High quality but insufficient quantity,Descriptive statistics only
+phyto_wide,440,46,9.57,500,False,LOW,High dimensionality with small sample (curse of dimensionality),High dimensional species data,Descriptive statistics only

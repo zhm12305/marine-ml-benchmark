@@ -1,0 +1,43 @@
+Dataset,Model,Best_Parameters,CV_Score,Search_Method,N_Trials,Selection_Metric
+era5_daily,RandomForest,"{
+  ""n_estimators"": 200,
+  ""max_depth"": 15,
+  ""min_samples_split"": 5,
+  ""min_samples_leaf"": 2,
+  ""max_features"": ""sqrt"",
+  ""random_state"": 42
+}",0.6996,RandomizedSearchCV,50,R²
+cleaned_data,RandomForest,"{
+  ""n_estimators"": 300,
+  ""max_depth"": 20,
+  ""min_samples_split"": 2,
+  ""min_samples_leaf"": 1,
+  ""max_features"": ""sqrt"",
+  ""random_state"": 42
+}",0.8039,RandomizedSearchCV,50,R²
+rolling_mean,RandomForest,"{
+  ""n_estimators"": 200,
+  ""max_depth"": null,
+  ""min_samples_split"": 2,
+  ""min_samples_leaf"": 1,
+  ""max_features"": ""sqrt"",
+  ""random_state"": 42
+}",0.8554,RandomizedSearchCV,50,R²
+hydrographic,LSTM,"{
+  ""hidden_size"": 128,
+  ""num_layers"": 2,
+  ""dropout"": 0.2,
+  ""learning_rate"": 0.001,
+  ""batch_size"": 32,
+  ""epochs"": 100,
+  ""random_state"": 42
+}",0.6882,RandomizedSearchCV,50,R²
+biotoxin,LSTM,"{
+  ""hidden_size"": 64,
+  ""num_layers"": 1,
+  ""dropout"": 0.1,
+  ""learning_rate"": 0.01,
+  ""batch_size"": 16,
+  ""epochs"": 50,
+  ""random_state"": 42
+}",0.1011,RandomizedSearchCV,50,R²

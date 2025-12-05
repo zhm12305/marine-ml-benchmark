@@ -1,0 +1,10 @@
+dataset,original_r2,permuted_r2,pass_sanity_check,n_features,n_samples,error
+biotoxin,,,False,0,0,[Errno 2] No such file or directory: 'D:\\SCI\\数据集\\chl_benchmark\\marine-ml-benchmark\\code\\data\\processed\\biotoxin\\clean.csv'
+cast,,,False,0,0,[Errno 2] No such file or directory: 'D:\\SCI\\数据集\\chl_benchmark\\marine-ml-benchmark\\code\\data\\processed\\cast\\clean.csv'
+era5_daily,,,False,0,0,[Errno 2] No such file or directory: 'D:\\SCI\\数据集\\chl_benchmark\\marine-ml-benchmark\\code\\data\\processed\\era5_daily\\clean.csv'
+cleaned_data,,,False,0,0,[Errno 2] No such file or directory: 'D:\\SCI\\数据集\\chl_benchmark\\marine-ml-benchmark\\code\\data\\processed\\cleaned_data\\clean.csv'
+rolling_mean,,,False,0,0,[Errno 2] No such file or directory: 'D:\\SCI\\数据集\\chl_benchmark\\marine-ml-benchmark\\code\\data\\processed\\rolling_mean\\clean.csv'
+processed_seq,,,False,0,0,[Errno 2] No such file or directory: 'D:\\SCI\\数据集\\chl_benchmark\\marine-ml-benchmark\\code\\data\\processed\\processed_seq\\clean.csv'
+hydrographic,,,False,0,0,[Errno 2] No such file or directory: 'D:\\SCI\\数据集\\chl_benchmark\\marine-ml-benchmark\\code\\data\\processed\\hydrographic\\clean.csv'
+phyto_wide,,,False,0,0,[Errno 2] No such file or directory: 'D:\\SCI\\数据集\\chl_benchmark\\marine-ml-benchmark\\code\\data\\processed\\phyto_wide\\clean.csv'
+phyto_long,,,False,0,0,[Errno 2] No such file or directory: 'D:\\SCI\\数据集\\chl_benchmark\\marine-ml-benchmark\\code\\data\\processed\\phyto_long\\clean.csv'

@@ -1,0 +1,7 @@
+# 忽略所有处理后的大数据和模型文件
+data/processed/
+models/
+
+# 保险起见，所有 npz 和 pkl 文件都不跟踪
+*.npz
+*.pkl
