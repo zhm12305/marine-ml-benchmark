@@ -1,4 +1,5 @@
 import argparse, joblib, optuna, numpy as np, pandas as pd
+import os
 from pathlib import Path
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.ensemble import RandomForestRegressor
@@ -11,11 +12,21 @@ from src.utils_io import read_cfg
 ROOT = Path(__file__).resolve().parents[1]
 
 # ---------------- model registry ----------------
+def _xgb_params(params):
+    params = params.copy()
+    use_gpu = os.getenv("XGB_USE_GPU", "0") == "1"
+    if use_gpu:
+        params.setdefault("tree_method", "gpu_hist")
+        params.setdefault("predictor", "gpu_predictor")
+        params.setdefault("gpu_id", 0)
+    return params
+
+
 def get_model(name, params):
     if name == "rf":
         return RandomForestRegressor(random_state=0, **params)
     if name == "xgb":
-        return XGBRegressor(random_state=0, **params)
+        return XGBRegressor(random_state=0, **_xgb_params(params))
     if name == "svr":
         return SVR(**params)
     raise ValueError(name)

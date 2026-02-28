@@ -62,6 +62,28 @@ bash code/scripts/run_full_pipeline.sh
 python code/scripts/run_reproduction.py
 ```
 
+## ✅ PLOS ONE Revision Pipeline (New)
+
+This pipeline generates all revision-required analyses (permutation test K=10,000, hydrographic baseline check, ERA5 downsampling ablation) and regenerates all tables and high-resolution figures (PDF/PNG/TIFF).
+
+```bash
+# Full revision pipeline (can be long for K=10,000)
+python code/scripts/run_plos_revision.py --permutations 10000 --model xgb
+
+# Faster smoke test (subsamples for sanity check)
+python code/scripts/run_plos_revision.py --fast --permutations 1000 --model ridge
+```
+
+Key outputs:
+- `outputs/tables/complete_sanity_check_results.csv`
+- `outputs/tables/hydrographic_baseline_diagnostics.csv`
+- `outputs/tables/era5_downsample_ablation.csv`
+- `outputs/tables/dataset_split_summary.csv`
+- `outputs/tables/dataset_geography_summary.csv`
+- `outputs/tables/transfer_pilot.csv`
+- `outputs/figures/figure*_final.pdf/png/tiff`
+- `outputs/plos_submission/Fig*.tif` and `outputs/plos_submission/S*_Table.docx` (PLOS naming)
+
 ## 📊 Results Overview
 
 ### Key Findings
@@ -151,6 +173,10 @@ All tables are generated as CSV files in `outputs/tables/`:
 - `complete_sanity_check_results.csv` - Data leakage detection results
 - `small_sample_analysis.csv` - Small sample exclusion analysis
 - `SUPPLEMENTARY_TABLES_INDEX.md` - Complete index of all tables
+- `hydrographic_baseline_diagnostics.csv` - Baseline R² diagnostics for hydrographic
+- `era5_downsample_ablation.csv` - ERA5 sample-size ablation results
+- `dataset_split_summary.csv` - Train/val/test date ranges for time-series datasets
+- `dataset_geography_summary.csv` - Latitude/longitude bounds per dataset
 
 ### Paper Figures
 All figures are generated in `outputs/figures/` (PNG + PDF formats):

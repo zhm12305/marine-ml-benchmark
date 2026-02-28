@@ -1,31 +1,33 @@
 import numpy as np, pandas as pd, joblib, torch
 from pathlib import Path
-from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
+from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error, precision_recall_fscore_support
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from src.utils_io import read_cfg
 import warnings
 warnings.filterwarnings('ignore')
 
 ROOT = Path(__file__).resolve().parents[1]
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # 重新定义深度学习模型类（用于加载）
 import torch.nn as nn
 
 class DeepModelWrapper:
     """深度学习模型包装器，用于评估"""
-    def __init__(self, model, scaler_X, scaler_y):
-        self.model = model
+    def __init__(self, model, scaler_X, scaler_y, device=DEVICE):
+        self.model = model.to(device)
         self.scaler_X = scaler_X
         self.scaler_y = scaler_y
+        self.device = device
 
     def predict(self, X):
         """预测方法，兼容sklearn接口"""
         self.model.eval()
         X_scaled = self.scaler_X.transform(X.reshape(-1, X.shape[-1])).reshape(X.shape)
-        X_tensor = torch.FloatTensor(X_scaled)
+        X_tensor = torch.FloatTensor(X_scaled).to(self.device)
         with torch.no_grad():
             outputs = self.model(X_tensor).squeeze()
-            predictions = self.scaler_y.inverse_transform(outputs.cpu().numpy().reshape(-1, 1)).flatten()
+            predictions = self.scaler_y.inverse_transform(outputs.detach().cpu().numpy().reshape(-1, 1)).flatten()
         return predictions
 
 class LSTMModel(nn.Module):
@@ -140,18 +142,19 @@ class TransformerModelOld(nn.Module):
         return x
 
 class DeepModelWrapper:
-    def __init__(self, model, scaler_X, scaler_y):
-        self.model = model
+    def __init__(self, model, scaler_X, scaler_y, device=DEVICE):
+        self.model = model.to(device)
         self.scaler_X = scaler_X
         self.scaler_y = scaler_y
+        self.device = device
         
     def predict(self, X):
         self.model.eval()
         X_scaled = self.scaler_X.transform(X.reshape(-1, X.shape[-1])).reshape(X.shape)
-        X_tensor = torch.FloatTensor(X_scaled)
+        X_tensor = torch.FloatTensor(X_scaled).to(self.device)
         with torch.no_grad():
             outputs = self.model(X_tensor).squeeze()
-            predictions = self.scaler_y.inverse_transform(outputs.numpy().reshape(-1, 1)).flatten()
+            predictions = self.scaler_y.inverse_transform(outputs.detach().cpu().numpy().reshape(-1, 1)).flatten()
         return predictions
 
 def bootstrap_metrics(y_true, y_pred, n_bootstrap=1000, confidence_level=0.95):
@@ -185,6 +188,37 @@ def bootstrap_metrics(y_true, y_pred, n_bootstrap=1000, confidence_level=0.95):
         results[f'{metric}_ci_upper'] = np.percentile(scores, upper_percentile)
     
     return results
+
+
+def nrmse(y_true, y_pred):
+    rmse = mean_squared_error(y_true, y_pred, squared=False)
+    denom = np.max(y_true) - np.min(y_true)
+    if denom == 0:
+        return np.nan
+    return rmse / denom
+
+
+def nse(y_true, y_pred):
+    denom = np.sum((y_true - np.mean(y_true)) ** 2)
+    if denom == 0:
+        return np.nan
+    return 1 - (np.sum((y_true - y_pred) ** 2) / denom)
+
+
+def event_metrics(y_true, y_pred, threshold=None):
+    if threshold is None:
+        threshold = np.percentile(y_true, 90)
+    y_true_bin = (y_true >= threshold).astype(int)
+    y_pred_bin = (y_pred >= threshold).astype(int)
+    precision, recall, f1, _ = precision_recall_fscore_support(
+        y_true_bin, y_pred_bin, average="binary", zero_division=0
+    )
+    return {
+        "event_threshold": float(threshold),
+        "event_precision": float(precision),
+        "event_recall": float(recall),
+        "event_f1": float(f1),
+    }
 
 def load_deep_model(model_path, model_type, input_size=None):
     """加载深度学习模型"""
@@ -295,8 +329,13 @@ def evaluate_dataset(ds_key, cfg):
                     "R2": r2_score(y_true, y_pred),
                     "MAE": mean_absolute_error(y_true, y_pred),
                     "RMSE": mean_squared_error(y_true, y_pred, squared=False),
+                    "NRMSE": nrmse(y_true, y_pred),
+                    "NSE": nse(y_true, y_pred),
                     "n_samples": len(y_true)
                 }
+
+                if ds_key == "biotoxin":
+                    base_metrics.update(event_metrics(y_true, y_pred))
                 
                 # Bootstrap置信区间
                 bootstrap_results = bootstrap_metrics(y_true, y_pred, 
@@ -329,8 +368,13 @@ def evaluate_dataset(ds_key, cfg):
                     "R2": r2_score(y_sequence, y_pred),
                     "MAE": mean_absolute_error(y_sequence, y_pred),
                     "RMSE": mean_squared_error(y_sequence, y_pred, squared=False),
+                    "NRMSE": nrmse(y_sequence, y_pred),
+                    "NSE": nse(y_sequence, y_pred),
                     "n_samples": len(y_sequence)
                 }
+
+                if ds_key == "biotoxin":
+                    base_metrics.update(event_metrics(y_sequence, y_pred))
                 
                 # Bootstrap置信区间
                 bootstrap_results = bootstrap_metrics(y_sequence, y_pred,

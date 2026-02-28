@@ -7,6 +7,11 @@ Small Sample Size Analysis and Documentation
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+OUT_TABLES = REPO_ROOT / "outputs" / "tables"
+OUT_FIGS = REPO_ROOT / "outputs" / "figures"
 
 def analyze_small_samples():
     """分析极小样本数据集"""
@@ -72,7 +77,8 @@ def analyze_small_samples():
     
     # 保存分析结果
     analysis_df = pd.DataFrame(analysis_results)
-    analysis_df.to_csv('tables/small_sample_analysis.csv', index=False)
+    OUT_TABLES.mkdir(parents=True, exist_ok=True)
+    analysis_df.to_csv(OUT_TABLES / "small_sample_analysis.csv", index=False)
     
     return analysis_df
 
@@ -125,7 +131,8 @@ def create_sample_size_guidelines():
     }
     
     guidelines_df = pd.DataFrame(guidelines)
-    guidelines_df.to_csv('tables/sample_size_guidelines.csv', index=False)
+    OUT_TABLES.mkdir(parents=True, exist_ok=True)
+    guidelines_df.to_csv(OUT_TABLES / "sample_size_guidelines.csv", index=False)
     
     print(guidelines_df.to_string(index=False))
     
@@ -201,7 +208,7 @@ The exclusion of small sample datasets highlights important considerations:
 """
     
     # 保存补充材料文本
-    with open('supplementary_small_samples.md', 'w', encoding='utf-8') as f:
+    with open(REPO_ROOT / "supplementary_small_samples.md", 'w', encoding='utf-8') as f:
         f.write(supplement_text)
     
     print(f"✅ Supplementary material text generated")
@@ -261,7 +268,8 @@ def create_sample_size_visualization():
     ax2.set_title('Sample Size Distribution')
     
     plt.tight_layout()
-    plt.savefig('figures/sample_size_analysis.png', dpi=300, bbox_inches='tight')
+    OUT_FIGS.mkdir(parents=True, exist_ok=True)
+    plt.savefig(OUT_FIGS / "sample_size_analysis.png", dpi=300, bbox_inches='tight')
     plt.close()
     
     print(f"✅ Sample size visualization saved: figures/sample_size_analysis.png")

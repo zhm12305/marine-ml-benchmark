@@ -63,3 +63,4 @@ dependencies:
     - shap==0.39.0
     - lime==0.2.0.1
     - feature-engine==1.4.1
+    - python-docx==1.1.0

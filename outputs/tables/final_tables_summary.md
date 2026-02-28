@@ -13,13 +13,13 @@
 - **Deep Learning**: 10
 
 ## Table 3: Best Performance
-- **Best Overall R²**: 0.8554 (rolling_mean - RF)
-- **Traditional ML Wins**: 4
-- **Deep Learning Wins**: 3
+- **Best Overall R²**: 0.8777 (hydrographic - XGB)
+- **Traditional ML Wins**: 5
+- **Deep Learning Wins**: 2
 
 ## Table 4: Validation Summary
 - **Validation Pass Rate**: 0/9
-- **Difficulty Distribution**: {'Very Hard': 2, 'Hard': 2, 'Easy': 2, 'Unknown': 2, 'Medium': 1}
+- **Difficulty Distribution**: {'Easy': 3, 'Hard': 2, 'Unknown': 2, 'Very Hard': 1, 'Medium': 1}
 - **Deep Learning Success**: {'2/2': 5, '0/2': 2, '0/0': 2}
 
 ## Key Findings

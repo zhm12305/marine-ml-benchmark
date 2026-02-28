@@ -10,8 +10,18 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.patches import FancyBboxPatch, Rectangle
 import matplotlib.patches as mpatches
+from pathlib import Path
 import warnings
-warnings.filterwarnings('ignore')
+
+warnings.filterwarnings("ignore")
+
+FIG_DIR = Path("outputs/figures")
+FIG_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def save_figure(basename, dpi=600):
+    for ext in ["pdf", "png", "tiff"]:
+        plt.savefig(FIG_DIR / f"{basename}.{ext}", dpi=dpi, bbox_inches="tight", facecolor="white")
 
 # 设置图像参数 - 符合SPIE期刊标准，改进版
 plt.rcParams.update({
@@ -166,9 +176,9 @@ def create_figure1_dataset_overview(data):
 
     plt.tight_layout()
 
-    # 保存PDF和PNG
-    plt.savefig('figures/figure1_dataset_overview_final.pdf', dpi=300, bbox_inches='tight', facecolor='white')
-    plt.savefig('figures/figure1_dataset_overview_final.png', dpi=300, bbox_inches='tight', facecolor='white')
+    # 保存高分辨率输出
+    # Renumbered: dataset overview is now Fig2
+    save_figure("figure2_dataset_overview_final")
     plt.close()
     
     print("   ✅ Figure 1 已生成")
@@ -179,6 +189,8 @@ def create_figure2_performance_heatmap(data):
 
     # 使用最终table2数据
     table2 = data['table2']
+
+    baseline_df = table2[(table2['Type'] == 'Baseline') & (table2['Model'] == 'MEAN')]
 
     # 获取所有模型和数据集，并排序
     all_models = sorted(table2['Model'].unique())
@@ -202,40 +214,56 @@ def create_figure2_performance_heatmap(data):
                 except:
                     performance_matrix[i, j] = np.nan
     
-    # 创建改进的热力图
-    fig, ax = plt.subplots(figsize=(12, 8))
+    # Refined heatmap styling for publication quality
+    fig, ax = plt.subplots(figsize=(12.5, 7.6))
+    ax.set_facecolor("#f7f9fc")
 
-    # 使用改进的颜色映射和范围
-    heatmap = sns.heatmap(performance_matrix,
-                         annot=True,
-                         fmt='.3f',
-                         cmap='coolwarm',  # 改进的配色
-                         center=0,
-                         vmin=-1.0,        # 扩大负值范围以显示极端负值
-                         vmax=0.9,
-                         cbar_kws={'label': 'R² Score'},
-                         ax=ax,
-                         annot_kws={'fontsize': 14},  # 大幅增大注释字体
-                         xticklabels=all_models,
-                         yticklabels=all_datasets)
+    from matplotlib.colors import TwoSlopeNorm
 
-    # 大幅增大标签字体
-    ax.set_xlabel('Dataset', fontsize=18)
-    ax.set_ylabel('Model', fontsize=18)
+    cmap = sns.color_palette("vlag", as_cmap=True)
+    # Saturate strongly negative values to improve near-zero contrast
+    norm = TwoSlopeNorm(vmin=-0.30, vcenter=0.0, vmax=0.90)
 
-    # 大幅增大刻度标签字体
-    ax.tick_params(axis='x', labelsize=16, rotation=45)
-    ax.tick_params(axis='y', labelsize=16, rotation=0)
+    heatmap = sns.heatmap(
+        performance_matrix,
+        annot=True,
+        fmt=".3f",
+        cmap=cmap,
+        norm=norm,
+        linewidths=0.6,
+        linecolor="#e6eaf2",
+        cbar_kws={"label": "R² score", "shrink": 0.85, "pad": 0.02},
+        ax=ax,
+        annot_kws={"fontsize": 12, "fontweight": "bold"},
+        xticklabels=all_models,
+        yticklabels=all_datasets,
+    )
 
-    # 增大颜色条刻度字体
+    # Make annotation color readable on both light/dark tiles
+    for text in heatmap.texts:
+        try:
+            val = float(text.get_text())
+        except Exception:
+            val = 0.0
+        text.set_color("white" if abs(val) > 0.45 else "#1f2933")
+
+    ax.set_xlabel("Model", fontsize=16, color="#111827")
+    ax.set_ylabel("Dataset", fontsize=16, color="#111827")
+
+    ax.tick_params(axis="x", labelsize=13, rotation=35, colors="#111827")
+    ax.tick_params(axis="y", labelsize=13, rotation=0, colors="#111827")
+
+    # Polish colorbar
     cbar = ax.collections[0].colorbar
-    cbar.ax.tick_params(labelsize=14)
+    cbar.ax.tick_params(labelsize=12, colors="#111827")
+    cbar.outline.set_linewidth(0.6)
+    cbar.outline.set_edgecolor("#c7ceda")
 
     plt.tight_layout()
 
-    # 保存PDF和PNG
-    plt.savefig('figures/figure2_performance_heatmap_final.pdf', dpi=300, bbox_inches='tight', facecolor='white')
-    plt.savefig('figures/figure2_performance_heatmap_final.png', dpi=300, bbox_inches='tight', facecolor='white')
+    # 保存高分辨率输出
+    # Renumbered: heatmap is now Fig3
+    save_figure("figure3_performance_heatmap_final")
     plt.close()
     
     print("   ✅ Figure 2 已生成")
@@ -345,9 +373,9 @@ def create_figure3_performance_boxplots(data):
     
     plt.tight_layout()
 
-    # 保存PDF和PNG - 600 DPI高分辨率
-    plt.savefig('figures/figure3_performance_boxplots_final.pdf', dpi=600, bbox_inches='tight', facecolor='white')
-    plt.savefig('figures/figure3_performance_boxplots_final.png', dpi=600, bbox_inches='tight', facecolor='white')
+    # 保存高分辨率输出
+    # Renumbered: boxplots are now Fig4
+    save_figure("figure4_performance_boxplots_final", dpi=600)
     plt.close()
     
     print("   ✅ Figure 3 已生成")
@@ -358,6 +386,9 @@ def create_figure4_model_robustness(data):
 
     # 使用最终table2数据
     table2 = data['table2']
+    baseline_df = table2[(table2['Type'] == 'Baseline') & (table2['Model'] == 'MEAN')]
+    ci_cols = [c for c in table2.columns if 'CI' in c]
+    ci_col = ci_cols[0] if ci_cols else None
 
     # 创建雷达图 - 进一步缩小整体图片尺寸
     fig, ax = plt.subplots(figsize=(6.5, 6.5), subplot_kw=dict(projection='polar'))
@@ -372,6 +403,41 @@ def create_figure4_model_robustness(data):
 
     metrics = {}
 
+    def _parse_ci(ci_str):
+        if not isinstance(ci_str, str):
+            return None
+        if ci_str.strip().upper() == 'N/A':
+            return None
+        try:
+            parts = ci_str.strip('[]').split(',')
+            if len(parts) != 2:
+                return None
+            return float(parts[0]), float(parts[1])
+        except Exception:
+            return None
+
+    def _significant_gain_rate(model_df, baseline_df):
+        # fraction of datasets where model CI lower > baseline CI upper
+        total = 0
+        sig = 0
+        for _, row in model_df.iterrows():
+            dataset = row['Dataset']
+            model_ci = _parse_ci(row[ci_col]) if ci_col else None
+            if model_ci is None:
+                continue
+            base_row = baseline_df[baseline_df['Dataset'] == dataset]
+            if base_row.empty:
+                continue
+            base_ci = _parse_ci(base_row.iloc[0][ci_col]) if ci_col else None
+            if base_ci is None:
+                continue
+            total += 1
+            if model_ci[0] > base_ci[1]:
+                sig += 1
+        return (sig / total) if total > 0 else 0
+
+
+
     for model in all_models:
         model_data = table2[table2['Model'] == model]
         if not model_data.empty:
@@ -385,11 +451,11 @@ def create_figure4_model_robustness(data):
             if len(r2_scores) > 0:
                 r2_array = np.array(r2_scores)
                 metrics[model] = {
-                    'Mean Performance': max(0, (np.mean(r2_array) + 1) / 2),  # 归一化到0-1
-                    'Stability': max(0, 1 - np.std(r2_array)),  # 稳定性
-                    'Coverage': len(r2_scores) / len(table2['Dataset'].unique()),  # 数据集覆盖率
-                    'Best Performance': max(0, (np.max(r2_array) + 1) / 2),  # 最佳性能
-                    'Consistency': max(0, 1 - (np.max(r2_array) - np.min(r2_array)) / 2)  # 一致性
+                    'Mean Performance': max(0, (np.mean(r2_array) + 1) / 2),  # 0-1
+                    'Stability (1-std)': max(0, 1 - np.std(r2_array)),
+                    'Sig. Gain Rate': _significant_gain_rate(model_data, baseline_df),
+                    'Best Performance': max(0, (np.max(r2_array) + 1) / 2),
+                    'Consistency': max(0, 1 - (np.max(r2_array) - np.min(r2_array)) / 2)
                 }
 
     # 设置角度
@@ -446,9 +512,9 @@ def create_figure4_model_robustness(data):
 
     plt.tight_layout()
 
-    # 保存PDF和PNG
-    plt.savefig('figures/figure4_model_robustness_final.pdf', dpi=300, bbox_inches='tight', facecolor='white')
-    plt.savefig('figures/figure4_model_robustness_final.png', dpi=300, bbox_inches='tight', facecolor='white')
+    # 保存高分辨率输出
+    # Renumbered: robustness is now Fig5
+    save_figure("figure5_model_robustness_final")
     plt.close()
     
     print("   ✅ Figure 4 已生成")
@@ -539,9 +605,9 @@ def create_figure5_difficulty_vs_size(data):
 
     plt.tight_layout()
 
-    # 保存PDF和PNG
-    plt.savefig('figures/figure5_difficulty_vs_size_final.pdf', dpi=300, bbox_inches='tight', facecolor='white')
-    plt.savefig('figures/figure5_difficulty_vs_size_final.png', dpi=300, bbox_inches='tight', facecolor='white')
+    # 保存高分辨率输出
+    # Renumbered: difficulty vs size is now Fig6
+    save_figure("figure6_difficulty_vs_size_final")
     plt.close()
     
     print("   ✅ Figure 5 已生成")
@@ -627,9 +693,9 @@ def create_figure6_feature_importance(data):
 
     plt.tight_layout()
 
-    # 保存PDF和PNG
-    plt.savefig('figures/figure6_feature_importance_final.pdf', dpi=300, bbox_inches='tight', facecolor='white')
-    plt.savefig('figures/figure6_feature_importance_final.png', dpi=300, bbox_inches='tight', facecolor='white')
+    # 保存高分辨率输出
+    # Renumbered: feature importance is now Fig7
+    save_figure("figure7_feature_importance_final")
     plt.close()
     
     print("   ✅ Figure 6 已生成")
@@ -784,9 +850,9 @@ def create_figure7_technical_roadmap(data):
 
     plt.tight_layout()
 
-    # 保存PDF和PNG
-    plt.savefig('figures/figure7_technical_roadmap_final.pdf', dpi=300, bbox_inches='tight', facecolor='white')
-    plt.savefig('figures/figure7_technical_roadmap_final.png', dpi=300, bbox_inches='tight', facecolor='white')
+    # 保存高分辨率输出
+    # Renumbered: technical roadmap is now Fig1
+    save_figure("figure1_technical_roadmap_final")
     plt.close()
 
     print("   ✅ Figure 7 已生成 (精美SCI水准技术路线图)")
@@ -833,6 +899,10 @@ def create_summary_report():
 - **Content**: Complete methodology from data collection to final recommendations
 - **Key Insight**: Systematic approach with rigorous validation ensures reliable results
 
+### Workflow Flowchart (Reviewer-requested)
+- **Purpose**: Explicit end-to-end study workflow for the Methods section
+- **Key Insight**: Sanity checks and robustness tests are first-class pipeline stages
+
 ## Technical Specifications
 - **Resolution**: 300 DPI for publication quality
 - **Formats**: PDF (vector) + PNG (raster) backup
@@ -858,7 +928,7 @@ if __name__ == "__main__":
 
     # 创建figures目录
     import os
-    os.makedirs('figures', exist_ok=True)
+    os.makedirs('outputs/figures', exist_ok=True)
 
     # 加载指定数据
     data = load_all_data()
@@ -867,13 +937,13 @@ if __name__ == "__main__":
         exit(1)
 
     # 生成所有7张图像 - 改进版
+    create_figure7_technical_roadmap(data)
     create_figure1_dataset_overview(data)
     create_figure2_performance_heatmap(data)
     create_figure3_performance_boxplots(data)
     create_figure4_model_robustness(data)
     create_figure5_difficulty_vs_size(data)
     create_figure6_feature_importance(data)
-    create_figure7_technical_roadmap(data)
 
     # 创建总结报告
     create_summary_report()
@@ -884,15 +954,15 @@ if __name__ == "__main__":
     print("   • 去掉图像标题")
     print("   • 8pt最小字体")
     print("   • 色盲友好配色")
-    print("   • PDF + PNG双格式")
+    print("   • PDF + PNG + TIFF")
     print("   • 重新设计技术路线图")
     print("   • 基于指定数据文件")
 
-    print(f"\n� 生成的文件:")
-    print(f"   - figures/figure1_dataset_overview_final.pdf/png")
-    print(f"   - figures/figure2_performance_heatmap_final.pdf/png")
-    print(f"   - figures/figure3_performance_boxplots_final.pdf/png")
-    print(f"   - figures/figure4_model_robustness_final.pdf/png")
-    print(f"   - figures/figure5_difficulty_vs_size_final.pdf/png")
-    print(f"   - figures/figure6_feature_importance_final.pdf/png")
-    print(f"   - figures/figure7_technical_roadmap_final.pdf/png")
+    print(f"\n生成的文件:")
+    print(f"   - outputs/figures/figure1_technical_roadmap_final.pdf/png/tiff")
+    print(f"   - outputs/figures/figure2_dataset_overview_final.pdf/png/tiff")
+    print(f"   - outputs/figures/figure3_performance_heatmap_final.pdf/png/tiff")
+    print(f"   - outputs/figures/figure4_performance_boxplots_final.pdf/png/tiff")
+    print(f"   - outputs/figures/figure5_model_robustness_final.pdf/png/tiff")
+    print(f"   - outputs/figures/figure6_difficulty_vs_size_final.pdf/png/tiff")
+    print(f"   - outputs/figures/figure7_feature_importance_final.pdf/png/tiff")

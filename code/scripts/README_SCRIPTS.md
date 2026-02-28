@@ -236,3 +236,37 @@ logs/
 6. `verify_completeness.py` → Final verification
 
 This comprehensive script collection ensures complete reproducibility and provides flexible tools for custom analysis and extension of the Marine ML Benchmark study.
+
+## ✅ PLOS ONE Revision Scripts (New)
+
+### `run_plos_revision.py`
+- **Purpose**: End-to-end revision pipeline (K=10,000 permutation test, hydrographic baseline check, ERA5 downsampling ablation, updated tables/figures)
+- **Usage**: `python code/scripts/run_plos_revision.py --permutations 10000 --model xgb`
+
+### `complete_sanity_check.py`
+- **Purpose**: Label permutation test with configurable K and p-value `(b+1)/(K+1)`
+- **Usage**: `python code/scripts/complete_sanity_check.py --n-permutations 10000 --model xgb`
+
+### `hydrographic_baseline_diagnostic.py`
+- **Purpose**: Baseline (train-mean) verification and target distribution plots
+- **Outputs**: `outputs/tables/hydrographic_baseline_diagnostics.csv`, `outputs/figures/hydrographic_target_distribution.png`
+
+### `downsample_era5_ablation.py`
+- **Purpose**: Sample-size ablation for ERA5 (quality vs quantity)
+- **Outputs**: `outputs/tables/era5_downsample_ablation.csv`, `outputs/figures/era5_downsample_curve.(png/pdf/tiff)`
+
+### `dataset_split_summary.py`
+- **Purpose**: Train/val/test date ranges for time-series datasets
+- **Output**: `outputs/tables/dataset_split_summary.csv`
+
+### `dataset_geography_summary.py`
+- **Purpose**: Latitude/longitude bounds per dataset
+- **Output**: `outputs/tables/dataset_geography_summary.csv`
+
+### `generate_alternative_metrics.py`
+- **Purpose**: Export complementary metrics (NRMSE, NSE, event F1) on holdout splits
+- **Outputs**: `outputs/tables/alternative_metrics_detailed.csv`, `outputs/tables/alternative_metrics_summary.csv`
+
+### `export_plos_assets.py`
+- **Purpose**: Export PLOS naming (Fig1.tif, S1_Fig.tif, S2_Fig.tif, S*_Table.docx, etc.)
+- **Output**: `outputs/plos_submission/`

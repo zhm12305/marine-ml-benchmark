@@ -38,6 +38,10 @@
 - **Content**: Complete methodology from data collection to final recommendations
 - **Key Insight**: Systematic approach with rigorous validation ensures reliable results
 
+### Workflow Flowchart (Reviewer-requested)
+- **Purpose**: Explicit end-to-end study workflow for the Methods section
+- **Key Insight**: Sanity checks and robustness tests are first-class pipeline stages
+
 ## Technical Specifications
 - **Resolution**: 300 DPI for publication quality
 - **Formats**: PDF (vector) + PNG (raster) backup

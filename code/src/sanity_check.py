@@ -21,6 +21,8 @@ warnings.filterwarnings('ignore')
 # Add src directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
 def get_target_column(dataset_name, df):
     """获取目标列"""
     target_mapping = {
@@ -151,7 +153,7 @@ def run_all_datasets_sanity_check():
         
         try:
             # 加载数据
-            data_path = base_path.parent / f'data/processed/{dataset}/clean.csv'
+            data_path = REPO_ROOT / "data" / "processed" / dataset / "clean.csv"
             df = pd.read_csv(data_path)
             
             # 获取目标列
@@ -227,8 +229,7 @@ def generate_sanity_check_report(results):
             print(f"   - {row['dataset']}: {reason}")
     
     # 保存结果
-    base_path = Path(__file__).parent.parent.parent
-    output_path = base_path / 'outputs' / 'tables' / 'complete_sanity_check_results.csv'
+    output_path = REPO_ROOT / "outputs" / "tables" / "complete_sanity_check_results.csv"
     results_df.to_csv(output_path, index=False)
     print(f"\n💾 完整结果已保存: {output_path}")
     

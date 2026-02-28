@@ -24,6 +24,7 @@ optuna==2.8.0
 # Utilities
 tqdm==4.61.2
 joblib==1.0.1
+pyyaml==5.4.1
 
 # Jupyter (optional)
 jupyter==1.0.0
@@ -32,3 +33,4 @@ ipykernel==6.0.3
 # Data handling
 openpyxl==3.0.7
 xlrd==2.0.1
+python-docx==1.1.0

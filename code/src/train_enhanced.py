@@ -1,4 +1,5 @@
 import argparse, joblib, optuna, numpy as np, pandas as pd
+import os
 import json, torch, torch.nn as nn
 from pathlib import Path
 from sklearn.model_selection import TimeSeriesSplit, train_test_split
@@ -152,11 +153,21 @@ class TransformerModel(nn.Module):
         return x
 
 # ================ 模型注册表 ================
+def _xgb_params(params):
+    params = params.copy()
+    use_gpu = os.getenv("XGB_USE_GPU", "0") == "1"
+    if use_gpu and torch.cuda.is_available():
+        params.setdefault("tree_method", "gpu_hist")
+        params.setdefault("predictor", "gpu_predictor")
+        params.setdefault("gpu_id", 0)
+    return params
+
+
 def get_model(name, params, input_size=None):
     if name == "rf":
         return RandomForestRegressor(random_state=42, **params)
     elif name == "xgb":
-        return XGBRegressor(random_state=42, **params)
+        return XGBRegressor(random_state=42, **_xgb_params(params))
     elif name == "svr":
         return SVR(**params)
     elif name == "lstm":
