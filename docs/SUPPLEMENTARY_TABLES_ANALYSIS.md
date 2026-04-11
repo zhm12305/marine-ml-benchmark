@@ -26,7 +26,7 @@
 - **源文件**: `tables/small_sample_analysis.csv`
 - **生成脚本**: `small_sample_analysis.py`
 - **内容**: 3行数据，分析被排除的小样本数据集
-- **字段**: Dataset, Samples, Variables, Sample/Feature Ratio, Minimum Required, Meets Minimum, Curse of Dimensionality Risk, Exclusion Reason, Data Quality, Recommendation
+- **字段**: Dataset, Samples, Variables, Sample/Feature Ratio, Benchmark requirement, Meets benchmark requirement, Curse of Dimensionality Risk, Exclusion Reason, Data Quality, Recommendation
 
 ---
 

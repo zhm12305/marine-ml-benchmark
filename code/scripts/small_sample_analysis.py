@@ -12,6 +12,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 OUT_TABLES = REPO_ROOT / "outputs" / "tables"
 OUT_FIGS = REPO_ROOT / "outputs" / "figures"
+OUT_REVISION_FIGS = REPO_ROOT / "outputs" / "revision_figures"
 
 def analyze_small_samples():
     """分析极小样本数据集"""
@@ -25,8 +26,8 @@ def analyze_small_samples():
             'variables': 1,
             'type': 'Cross-sectional',
             'target': 'phytoplankton_abundance',
-            'reason_excluded': 'Sample size below minimum threshold (N < 100)',
-            'min_required': 100,
+            'reason_excluded': 'Below benchmark inclusion threshold (N < 500)',
+            'benchmark_requirement': 'N ≥ 500',
             'data_quality': 'High quality but insufficient quantity'
         },
         'phyto_wide': {
@@ -34,8 +35,8 @@ def analyze_small_samples():
             'variables': 46,
             'type': 'Cross-sectional', 
             'target': 'phytoplankton_abundance',
-            'reason_excluded': 'High dimensionality with small sample (curse of dimensionality)',
-            'min_required': 500,
+            'reason_excluded': 'Below benchmark inclusion threshold and insufficient sample/feature ratio',
+            'benchmark_requirement': 'N ≥ 500 and sample/feature ratio ≥ 10',
             'data_quality': 'High dimensional species data'
         }
     }
@@ -47,8 +48,11 @@ def analyze_small_samples():
         # 计算样本-特征比
         sample_feature_ratio = info['samples'] / info['variables']
         
-        # 判断是否满足最小要求
-        meets_minimum = info['samples'] >= info['min_required']
+        # 判断是否满足benchmark纳入要求
+        if dataset == 'phyto_long':
+            meets_benchmark = info['samples'] >= 500
+        else:
+            meets_benchmark = (info['samples'] >= 500) and (sample_feature_ratio >= 10)
         
         # 维度诅咒风险
         curse_risk = "HIGH" if info['variables'] > info['samples'] else "LOW"
@@ -58,20 +62,20 @@ def analyze_small_samples():
             'Samples': info['samples'],
             'Variables': info['variables'],
             'Sample/Feature Ratio': f"{sample_feature_ratio:.2f}",
-            'Minimum Required': info['min_required'],
-            'Meets Minimum': meets_minimum,
+            'Benchmark requirement': info['benchmark_requirement'],
+            'Meets benchmark requirement': meets_benchmark,
             'Curse of Dimensionality Risk': curse_risk,
             'Exclusion Reason': info['reason_excluded'],
             'Data Quality': info['data_quality'],
-            'Recommendation': 'Descriptive statistics only' if not meets_minimum else 'Proceed with caution'
+            'Recommendation': 'Descriptive statistics only' if not meets_benchmark else 'Proceed with caution'
         })
         
         print(f"\n📋 {dataset.upper()}")
         print(f"   Samples: {info['samples']}")
         print(f"   Variables: {info['variables']}")
         print(f"   Sample/Feature ratio: {sample_feature_ratio:.2f}")
-        print(f"   Minimum required: {info['min_required']}")
-        print(f"   Status: {'✅ ADEQUATE' if meets_minimum else '❌ INSUFFICIENT'}")
+        print(f"   Benchmark requirement: {info['benchmark_requirement']}")
+        print(f"   Status: {'✅ ELIGIBLE' if meets_benchmark else '❌ EXCLUDED'}")
         print(f"   Curse risk: {curse_risk}")
         print(f"   Reason: {info['reason_excluded']}")
     
@@ -151,26 +155,26 @@ Two datasets were excluded from the main model comparison analysis due to insuff
 ### S1.1 phyto_long Dataset
 - **Sample size**: N = 82
 - **Variables**: 1 (phytoplankton abundance)
-- **Exclusion reason**: Sample size below minimum threshold for reliable machine learning model training
-- **Minimum required**: N ≥ 100 for basic cross-validation
+- **Exclusion reason**: Below benchmark inclusion threshold
+- **Benchmark requirement**: N ≥ 500
 - **Data quality**: High-quality measurements but insufficient quantity for robust model evaluation
 
 ### S1.2 phyto_wide Dataset  
 - **Sample size**: N = 440
 - **Variables**: 46 (species-level phytoplankton data)
-- **Exclusion reason**: High dimensionality relative to sample size (curse of dimensionality)
-- **Sample-to-feature ratio**: 9.6:1 (recommended minimum: 10:1 for tree-based models)
-- **Minimum required**: N ≥ 500 for high-dimensional data
+- **Exclusion reason**: Below benchmark inclusion threshold and insufficient sample-to-feature ratio
+- **Sample-to-feature ratio**: 9.6:1 (benchmark minimum: 10:1 for multivariate cross-sectional data)
+- **Benchmark requirement**: N ≥ 500 and sample/feature ratio ≥ 10
 - **Data quality**: Comprehensive species-level data but dimensionality challenges
 
 ## S2. Sample Size Guidelines Applied
 
-Following established machine learning best practices:
+Following the benchmark inclusion rules used in the revised manuscript:
 
-1. **Cross-validation requirements**: Minimum 50 samples (10 per fold for 5-fold CV)
-2. **Tree-based models**: Minimum 5-10 samples per feature
-3. **Statistical significance**: Minimum 30 samples for t-tests
-4. **Bootstrap confidence intervals**: Minimum 30 samples for stable estimates
+1. **Benchmark sample threshold**: Minimum N ≥ 500 for benchmark inclusion
+2. **Multivariate cross-sectional rule**: Require sample/feature ratio ≥ 10
+3. **Chronological evaluation**: Sufficient held-out test size must remain after splitting
+4. **Excluded datasets**: Can still support descriptive statistics and exploratory summaries
 
 ## S3. Descriptive Statistics for Excluded Datasets
 
@@ -197,7 +201,7 @@ The exclusion of small sample datasets highlights important considerations:
 
 ## S5. Recommendations for Future Studies
 
-1. **Minimum sample sizes**: N ≥ 500 for high-dimensional biological data
+1. **Minimum sample sizes**: N ≥ 500 for benchmark inclusion
 2. **Data aggregation strategies**: Consider temporal or spatial pooling
 3. **Dimensionality reduction**: Apply PCA or feature selection for high-dimensional data
 4. **Ensemble approaches**: Combine multiple small datasets when appropriate
@@ -239,7 +243,7 @@ def create_sample_size_visualization():
     # 子图1：所有数据集（对数尺度）
     names = list(datasets.keys())
     sizes = list(datasets.values())
-    colors = ['green' if s >= 1000 else 'orange' if s >= 500 else 'red' for s in sizes]
+    colors = ['green' if s >= 500 else 'red' for s in sizes]
     
     bars1 = ax1.bar(names, sizes, color=colors, alpha=0.7)
     ax1.set_yscale('log')
@@ -248,9 +252,20 @@ def create_sample_size_visualization():
     ax1.tick_params(axis='x', rotation=45)
     
     # 添加阈值线
-    ax1.axhline(y=1000, color='green', linestyle='--', alpha=0.7, label='Adequate (≥1000)')
-    ax1.axhline(y=500, color='orange', linestyle='--', alpha=0.7, label='Marginal (≥500)')
-    ax1.axhline(y=100, color='red', linestyle='--', alpha=0.7, label='Insufficient (<500)')
+    ax1.axhline(
+        y=500,
+        color='green',
+        linestyle='--',
+        alpha=0.8,
+        label='Benchmark-eligible by sample size (N ≥ 500)'
+    )
+    ax1.axhline(
+        y=499,
+        color='red',
+        linestyle=':',
+        alpha=0.8,
+        label='Below benchmark sample threshold (N < 500)'
+    )
     ax1.legend()
     
     # 子图2：样本量分布
@@ -269,7 +284,12 @@ def create_sample_size_visualization():
     
     plt.tight_layout()
     OUT_FIGS.mkdir(parents=True, exist_ok=True)
-    plt.savefig(OUT_FIGS / "sample_size_analysis.png", dpi=300, bbox_inches='tight')
+    OUT_REVISION_FIGS.mkdir(parents=True, exist_ok=True)
+    try:
+        plt.savefig(OUT_FIGS / "sample_size_analysis.png", dpi=300, bbox_inches='tight')
+    except PermissionError:
+        print("⚠️ Could not write to outputs/figures; saved revision copy instead")
+    plt.savefig(OUT_REVISION_FIGS / "sample_size_analysis.png", dpi=300, bbox_inches='tight')
     plt.close()
     
     print(f"✅ Sample size visualization saved: figures/sample_size_analysis.png")

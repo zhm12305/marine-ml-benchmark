@@ -143,12 +143,12 @@ def generate_supplementary_table_s4():
             'Samples': [82, 440],
             'Variables': [1, 46],
             'Sample/Feature Ratio': [82.0, 9.57],
-            'Minimum Required': [100, 500],
-            'Meets Minimum': [False, False],
+            'Benchmark requirement': ['N ≥ 500', 'N ≥ 500 and sample/feature ratio ≥ 10'],
+            'Meets benchmark requirement': [False, False],
             'Curse of Dimensionality Risk': ['LOW', 'LOW'],
             'Exclusion Reason': [
-                'Sample size below minimum threshold (N < 100)',
-                'High dimensionality with small sample (curse of dimensionality)'
+                'Below benchmark inclusion threshold (N < 500)',
+                'Below benchmark inclusion threshold and insufficient sample/feature ratio'
             ],
             'Data Quality': [
                 'High quality but insufficient quantity',

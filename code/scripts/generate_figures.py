@@ -221,8 +221,9 @@ def create_figure2_performance_heatmap(data):
     from matplotlib.colors import TwoSlopeNorm
 
     cmap = sns.color_palette("vlag", as_cmap=True)
-    # Saturate strongly negative values to improve near-zero contrast
-    norm = TwoSlopeNorm(vmin=-0.30, vcenter=0.0, vmax=0.90)
+    # Expanded negative range so severe failures are not visually flattened.
+    norm = TwoSlopeNorm(vmin=-0.65, vcenter=0.0, vmax=0.90)
+    cbar_ticks = [-0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8]
 
     heatmap = sns.heatmap(
         performance_matrix,
@@ -232,7 +233,7 @@ def create_figure2_performance_heatmap(data):
         norm=norm,
         linewidths=0.6,
         linecolor="#e6eaf2",
-        cbar_kws={"label": "R² score", "shrink": 0.85, "pad": 0.02},
+        cbar_kws={"label": "R² score", "shrink": 0.85, "pad": 0.02, "ticks": cbar_ticks},
         ax=ax,
         annot_kws={"fontsize": 12, "fontweight": "bold"},
         xticklabels=all_models,
@@ -558,18 +559,18 @@ def create_figure5_difficulty_vs_size(data):
             else:
                 best_r2 = -1.0  # 默认值
 
-        # 难度分级 - 色盲友好颜色
+        # Empirical skill-regime labels - 色盲友好颜色
         if best_r2 > 0.8:
-            difficulty = 'Easy'
+            difficulty = 'High skill'
             color = '#1a9850'  # 色盲友好绿色
         elif best_r2 > 0.5:
-            difficulty = 'Medium'
+            difficulty = 'Moderate skill'
             color = '#fee08b'  # 色盲友好橙色
         elif best_r2 > 0:
-            difficulty = 'Hard'
+            difficulty = 'Low skill'
             color = '#d73027'  # 色盲友好红色
         else:
-            difficulty = 'Very Hard'
+            difficulty = 'Very low skill'
             color = '#8c510a'  # 色盲友好棕色
 
         datasets.append(dataset)
@@ -592,7 +593,7 @@ def create_figure5_difficulty_vs_size(data):
     ax.grid(True, alpha=0.3)
     ax.axhline(y=0, color='black', linestyle='-', alpha=0.3)
 
-    # 添加难度区域 - 使用色盲友好颜色
+    # 添加 empirical skill regime 区域 - 使用色盲友好颜色
     ax.axhspan(0.8, 1.0, alpha=0.1, color='#1a9850')
     ax.axhspan(0.5, 0.8, alpha=0.1, color='#fee08b')
     ax.axhspan(0, 0.5, alpha=0.1, color='#d73027')

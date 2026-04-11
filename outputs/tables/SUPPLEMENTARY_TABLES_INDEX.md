@@ -66,10 +66,10 @@ This document provides an index and description of all supplementary tables incl
 - **File**: `small_sample_analysis.csv`
 - **Description**: Analysis of excluded datasets due to insufficient sample size
 - **Rows**: 2 excluded datasets (phyto_long, phyto_wide)
-- **Key Columns**: Dataset, Samples, Variables, Sample/Feature Ratio, Minimum Required, Meets Minimum, Curse of Dimensionality Risk, Exclusion Reason, Data Quality, Recommendation
+- **Key Columns**: Dataset, Samples, Variables, Sample/Feature Ratio, Benchmark requirement, Meets benchmark requirement, Curse of Dimensionality Risk, Exclusion Reason, Data Quality, Recommendation
 - **Analysis Details**:
-  - Sample size requirements (minimum 1000 samples)
-  - Curse of dimensionality assessment
+  - Benchmark sample threshold (N ≥ 500)
+  - Sample/feature ratio rule for multivariate cross-sectional data
   - Data quality evaluation
   - Recommendations for future use
 

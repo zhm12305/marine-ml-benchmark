@@ -14,6 +14,7 @@ from docx import Document
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIG_DIR = REPO_ROOT / "outputs" / "figures"
+REVISION_FIG_DIR = REPO_ROOT / "outputs" / "revision_figures"
 TABLE_DIR = REPO_ROOT / "outputs" / "tables"
 OUT_DIR = REPO_ROOT / "outputs" / "plos_submission"
 
@@ -62,13 +63,17 @@ def main():
             print(f"Missing TIFF for figure {i}")
 
     # Supporting figure
-    s1_png = FIG_DIR / "sample_size_analysis.png"
-    if s1_png.exists():
+    s1_candidates = [
+        REVISION_FIG_DIR / "sample_size_analysis.png",
+        FIG_DIR / "sample_size_analysis.png",
+    ]
+    s1_png = next((p for p in s1_candidates if p.exists()), None)
+    if s1_png is not None:
         img = plt.imread(s1_png)
         if img.dtype != np.uint8:
             img = (img * 255).clip(0, 255).astype(np.uint8)
         Image.fromarray(img).save(OUT_DIR / "S1_Fig.tif", format="TIFF")
-        print("Created S1_Fig.tif")
+        print(f"Created S1_Fig.tif from {s1_png.name}")
 
     # Workflow flowchart as supporting figure.
     flowchart_candidates = [
@@ -90,6 +95,34 @@ def main():
         print("Created S4_Fig.tif")
     else:
         print("Missing era5_downsample_curve.(tiff/png)")
+
+    # Biotoxin diagnostics as supporting figure.
+    biotoxin_fig_candidates = [
+        REVISION_FIG_DIR / "biotoxin_prediction_diagnostics",
+        FIG_DIR / "biotoxin_prediction_diagnostics",
+    ]
+    biotoxin_ok = False
+    for stem in biotoxin_fig_candidates:
+        if copy_or_convert_tiff(stem, OUT_DIR / "S5_Fig.tif"):
+            print(f"Created S5_Fig.tif from {stem.name}")
+            biotoxin_ok = True
+            break
+    if not biotoxin_ok:
+        print("Missing biotoxin_prediction_diagnostics.(tiff/png)")
+
+    # ERA5 proxy ablation as supporting figure.
+    era5_proxy_candidates = [
+        REVISION_FIG_DIR / "era5_proxy_ablation",
+        FIG_DIR / "era5_proxy_ablation",
+    ]
+    era5_proxy_ok = False
+    for stem in era5_proxy_candidates:
+        if copy_or_convert_tiff(stem, OUT_DIR / "S6_Fig.tif"):
+            print(f"Created S6_Fig.tif from {stem.name}")
+            era5_proxy_ok = True
+            break
+    if not era5_proxy_ok:
+        print("Missing era5_proxy_ablation.(tiff/png)")
 
     # Hydrographic target distribution as supporting figure.
     hydro_png = FIG_DIR / "hydrographic_target_distribution.png"
@@ -113,6 +146,10 @@ def main():
         "S6_Table.docx": "dataset_split_summary.csv",
         "S7_Table.docx": "dataset_geography_summary.csv",
         "S8_Table.docx": "transfer_pilot.csv",
+        "S9_Table.docx": "split_sensitivity_hydrographic.csv",
+        "S10_Table.docx": "biotoxin_diagnostic_summary.csv",
+        "S11_Table.docx": "era5_proxy_ablation.csv",
+        "S12_Table.docx": "traditional_baseline_comparison.csv",
     }
     for out_name, src_name in table_map.items():
         src_path = TABLE_DIR / src_name
